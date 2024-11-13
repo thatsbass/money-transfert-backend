@@ -1,7 +1,7 @@
 # Utiliser l'image PHP FPM
 FROM php:8.3-fpm
 
-# Installer les dépendances nécessaires pour Laravel, PostgreSQL et Redis
+# Installer les dépendances nécessaires pour Laravel et PostgreSQL
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpng-dev \
@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     git \
-    libpq-dev \  
+    libpq-dev \
     libzip-dev \
     redis-server \
     && docker-php-ext-install pdo pdo_pgsql zip gd mbstring exif pcntl bcmath \
@@ -40,8 +40,9 @@ RUN chown -R www-data:www-data /var/www/storage \
 # Copier et générer le fichier .env
 COPY .env.example .env
 RUN php artisan key:generate
-# Après RUN php artisan key:generate, ajoutez :
 RUN php artisan jwt:secret
+RUN php artisan config:clear
+RUN php artisan cache:clear
 RUN php artisan config:cache
 RUN php artisan route:cache
 
