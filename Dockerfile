@@ -1,7 +1,7 @@
 # Utiliser l'image PHP FPM
 FROM php:8.3-fpm
 
-# Installer les dépendances nécessaires pour Laravel et PostgreSQL
+# Installer les dépendances nécessaires pour Laravel, PostgreSQL et Redis
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpng-dev \
@@ -13,9 +13,12 @@ RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     git \
-    libpq-dev \
+    libpq-dev \  
     libzip-dev \
-    && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip gd mbstring exif pcntl bcmath
+    redis-server \
+    && docker-php-ext-install pdo pdo_pgsql zip gd mbstring exif pcntl bcmath \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
