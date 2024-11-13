@@ -63,19 +63,24 @@ return [
             ]) : [],
         ],
 
-       'pgsql' => [
-            'driver' => 'pgsql',
-            'url' => env('DATABASE_URL'),
-            'host' => parse_url(env('DATABASE_URL'), PHP_URL_HOST),
-            'port' => parse_url(env('DATABASE_URL'), PHP_URL_PORT) ?? 5432,
-            'database' => ltrim(parse_url(env('DATABASE_URL'), PHP_URL_PATH), '/'),
-            'username' => parse_url(env('DATABASE_URL'), PHP_URL_USER),
-            'password' => parse_url(env('DATABASE_URL'), PHP_URL_PASS),
-            'charset' => 'utf8',
-            'prefix' => '',
-            'schema' => 'public',
-            'sslmode' => 'require',
-        ],
+'pgsql' => [
+    'driver' => 'pgsql',
+    'host' => env('DB_HOST', '127.0.0.1'),
+    'port' => env('DB_PORT', '5432'),
+    'database' => env('DB_DATABASE', 'forge'),
+    'username' => env('DB_USERNAME', 'forge'),
+    'password' => env('DB_PASSWORD', ''),
+    'charset' => 'utf8',
+    'prefix' => '',
+    'schema' => 'public',
+    'sslmode' => 'require',
+    // Assurez-vous que la variable DATABASE_URL est définie et n'est pas null
+    'url' => env('DATABASE_URL', null),
+    'options'   => [
+        PDO::ATTR_TIMEOUT => 30,
+    ],
+],
+
 
         'sqlsrv' => [
             'driver' => 'sqlsrv',
