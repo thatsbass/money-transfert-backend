@@ -37,6 +37,10 @@ RUN chown -R www-data:www-data /var/www/storage \
 # Copier et générer le fichier .env
 COPY .env.example .env
 RUN php artisan key:generate
+# Après RUN php artisan key:generate, ajoutez :
+RUN php artisan jwt:secret
+RUN php artisan config:cache
+RUN php artisan route:cache
 
 # Exposer le port pour le serveur
 EXPOSE 8000
