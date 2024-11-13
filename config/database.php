@@ -73,13 +73,9 @@ return [
     'charset' => 'utf8',
     'prefix' => '',
     'schema' => 'public',
-    'sslmode' => 'require',
-    // Assurez-vous que la variable DATABASE_URL est définie et n'est pas null
-    'url' => env('DATABASE_URL', null),
-    'options'   => [
-        PDO::ATTR_TIMEOUT => 30,
-    ],
+    'sslmode' => 'require', // Si nécessaire pour Neon, sinon retire-le
 ],
+
 
 
         'sqlsrv' => [
