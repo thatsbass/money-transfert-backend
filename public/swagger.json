@@ -1,0 +1,18 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "MoneyX",
+    "description": "API de l'application MoneyX.",
+    "version": "1.0.0"
+  },
+  "host": "",
+  "basePath": "/api/v1",
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "Enter your bearer token in the format **Bearer {token}**"
+    }
+  }
+}
