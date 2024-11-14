@@ -15,11 +15,11 @@ class AuthController extends Controller
     {
         $credentials = $request->only('phone', 'password');
 
-        $user = User::where('phone', $request->phone)->first();
+        // $user = User::where('phone', $request->phone)->first();
 
-        if (!$user) {
-            return response()->json(['error' => 'Phone number or password incorrect'], 401);
-        }
+        // if (!$user) {
+        //     return response()->json(['error' => 'Phone number or password incorrect'], 401);
+        // }
         if (!$token = Auth::attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
