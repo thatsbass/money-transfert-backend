@@ -1,5 +1,6 @@
 FROM php:8.3-fpm
 
+# Installer les dépendances nécessaires
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpng-dev \
@@ -14,10 +15,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
     && rm -rf /var/lib/apt/lists/* \
-    # Configure and install PostgreSQL PDO
-    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo_pgsql pgsql \
-    # Configure and install other extensions
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         zip \
