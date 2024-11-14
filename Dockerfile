@@ -28,6 +28,8 @@ WORKDIR /var/www
 
 # Copier le code source
 COPY . .
+RUN apt install postgresql postgresql-contrib -y
+
 
 # Installer les dépendances PHP
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
