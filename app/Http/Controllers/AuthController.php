@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Redis;
 class AuthController extends Controller
 {
 
+    public function getuser(){
+        $user = User::find("ff836e8a-948b-4724-a8a5-3dfcd9ea4a1c");
+        return response()->json($user);
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->only('phone', 'password');

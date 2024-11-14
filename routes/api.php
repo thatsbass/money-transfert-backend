@@ -14,6 +14,7 @@ use App\Http\Controllers\UserController;
 Route::post('/register-client', [UserController::class, 'registerClient']);
 Route::post('/OTP-veriefied', [UserController::class, 'completeRegistration']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/get-user', [AuthController::class, 'getuser']);
 
 Route::get('/gen', [UserController::class, 'generate']);
 
