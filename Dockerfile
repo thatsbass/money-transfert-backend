@@ -49,8 +49,10 @@ RUN chown -R www-data:www-data /var/www/storage \
 # Copier le fichier .env
 COPY .env.example .env
 
-# Générer la clé et nettoyer le cache
-RUN php artisan key:generate \
+RUN php artisan key:generate
+
+# Générer la clé JWT avant la mise en cache
+RUN php artisan jwt:secret --force \
     && php artisan config:clear \
     && php artisan cache:clear
 
