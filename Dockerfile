@@ -1,59 +1,37 @@
 FROM php:8.3-fpm
 
-# Installer les dépendances nécessaires
+# Arguments defined in docker-compose.yml
+ARG user
+ARG uid
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
+    git \
+    curl \
     libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
     zip \
-    curl \
     unzip \
-    git \
-    libpq-dev \
-    libzip-dev \
-    && rm -rf /var/lib/apt/lists/* \
-    && docker-php-ext-install pdo_pgsql pgsql \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        zip \
-        gd \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-    && pecl install redis \
-    && docker-php-ext-enable redis
+    libpq-dev
 
-# Installer Composer
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd
+
+# Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Définir le répertoire de travail
+# Create system user to run Composer and Artisan Commands
+RUN useradd -G www-data,root -u $uid -d /home/$user $user
+RUN mkdir -p /home/$user/.composer && \
+    chown -R $user:$user /home/$user
+
+# Set working directory
 WORKDIR /var/www
 
-# Copier le code source
-COPY . .
-
-# Installer les dépendances PHP
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
-
-# Donner les permissions nécessaires
-RUN chown -R www-data:www-data /var/www/storage \
-    && chmod -R 775 /var/www/storage \
-    && chmod -R 775 /var/www/bootstrap/cache
-
-# Copier le fichier .env
-COPY .env.example .env
-
-RUN php artisan key:generate
-
-# Générer la clé JWT avant la mise en cache
-RUN php artisan jwt:secret --force \
-    && php artisan config:clear \
-    && php artisan cache:clear
-
-EXPOSE 8000
+USER $user
 
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]

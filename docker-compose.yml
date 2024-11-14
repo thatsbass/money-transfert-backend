@@ -1,37 +1,50 @@
-version: '3.8'
+version: '3.8'  # Utilisation d'une version plus récente
 
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app_wave
+      args:
+        user: laravel
+        uid: 1000
+    image: laravel-app
+    container_name: moneyX
+    restart: unless-stopped
+    working_dir: /var/www/
     volumes:
-      - .:/var/www
+      - ./:/var/www
+    networks:
+      - laravel
     ports:
       - "4000:8000"
+    depends_on:
+      - db  # Dépendance sur le service de base de données
+
+  db:
+    image: postgres:13
+    container_name: laravel-db
+    restart: unless-stopped
     environment:
-      - DB_CONNECTION=pgsql
-      - DB_HOST=ep-soft-mud-a57gl72t.us-east-2.aws.neon.tech
-      - DB_PORT=5432
-      - DB_DATABASE=neondb
-      - DB_USERNAME=neondb_owner
-      - DB_PASSWORD=TrBljv3bgmD1
-      - REDIS_HOST=redis
-      - REDIS_PASSWORD=null
-      - REDIS_PORT=6379
-      - JWT_SECRET=${JWT_SECRET}
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
     networks:
-      - app-network
+      - laravel
 
   redis:
     image: redis:alpine
-    container_name: redis
+    container_name: laravel-redis
+    restart: unless-stopped
     networks:
-      - app-network
-    ports:
-      - "6379:6379"
+      - laravel
 
 networks:
-  app-network:
+  laravel:
     driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
