@@ -20,6 +20,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PASSWORD=null
       - REDIS_PORT=6379
+      - JWT_SECRET=${JWT_SECRET}
     networks:
       - app-network
 
