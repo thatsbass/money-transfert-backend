@@ -16,7 +16,18 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libzip-dev \
     redis-server \
-    && docker-php-ext-install pdo pdo_pgsql zip gd mbstring exif pcntl bcmath \
+    && rm -rf /var/lib/apt/lists/* \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo \
+        pdo_pgsql \
+        pgsql \
+        zip \
+        gd \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
     && pecl install redis \
     && docker-php-ext-enable redis
 
@@ -28,8 +39,6 @@ WORKDIR /var/www
 
 # Copier le code source
 COPY . .
-RUN apt install postgresql postgresql-contrib -y
-
 
 # Installer les dépendances PHP
 RUN composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -41,12 +50,12 @@ RUN chown -R www-data:www-data /var/www/storage \
 
 # Copier et générer le fichier .env
 COPY .env.example .env
-RUN php artisan key:generate
-RUN php artisan jwt:secret
-RUN php artisan config:clear
-RUN php artisan cache:clear
-RUN php artisan config:cache
-RUN php artisan route:cache
+RUN php artisan key:generate \
+    && php artisan jwt:secret \
+    && php artisan config:clear \
+    && php artisan cache:clear \
+    && php artisan config:cache \
+    && php artisan route:cache
 
 # Exposer le port pour le serveur
 EXPOSE 8000
