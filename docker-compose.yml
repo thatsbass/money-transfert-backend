@@ -10,11 +10,8 @@ services:
       - .:/var/www
     ports:
       - "4000:8000"
-    networks:
-      - app-network
     environment:
       - DB_CONNECTION=pgsql
-      - DATABASE_URL=${DATABASE_URL}
       - DB_HOST=ep-soft-mud-a57gl72t.us-east-2.aws.neon.tech
       - DB_PORT=5432
       - DB_DATABASE=neondb
@@ -23,7 +20,8 @@ services:
       - REDIS_HOST=redis
       - REDIS_PASSWORD=null
       - REDIS_PORT=6379
-      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - app-network
 
   redis:
     image: redis:alpine
