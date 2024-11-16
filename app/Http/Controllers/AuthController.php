@@ -18,15 +18,9 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('phone', 'password');
-
-        $user = User::where('phone', $request->phone)->first();
-
-        if (!$user) {
+       
+        if (!$token = Auth::attempt($request->only('phone', 'password'))) {
             return response()->json(['error' => 'Phone number or password incorrect'], 401);
-        }
-        if (!$token = Auth::attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         return $this->respondWithToken($token);
@@ -45,9 +39,22 @@ class AuthController extends Controller
         return response()->json(['error' => 'Token not provided'], 400);
     }
 
-    public function me()
+    private function me()
     {
-        return response()->json(auth()->user());
+        $curUser = auth()->user();
+        $client = $curUser->client;
+        $clientData = $client ? $client->only(['id', 'address', 'CIN']) : null;
+        $user = ([
+            'id' => $curUser->id,
+            'firstName' => $curUser->firstName,
+            'lastName' => $curUser->lastName,
+            'email' => $curUser->email,
+            'phone' => $curUser->phone,
+            'role_id' => $curUser->role_id,
+            'photo' => $curUser->photo,
+            'client' => $clientData,
+        ]);
+        return $user;
     }
 
     public function refresh()
@@ -61,7 +68,7 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => Auth::factory()->getTTL() * 60,
-            'user_id' => Auth::user()->id
+            'user' => $this->me()
         ]);
     }
 }

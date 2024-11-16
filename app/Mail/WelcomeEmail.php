@@ -11,20 +11,19 @@ class WelcomeEmail extends Mailable
     use Queueable, SerializesModels;
 
     public $user;
-    public $pdfPath;
+    protected $pdfContent;
 
-    public function __construct($user, $pdfPath)
+    public function __construct($user, $pdfContent)
     {
         $this->user = $user;
-        $this->pdfPath = $pdfPath;
+        $this->pdfContent = $pdfContent;
     }
 
     public function build()
     {
         return $this->view('email.send-card')
-                    ->subject('Bienvenue sur MoneyX')
-                    ->attach($this->pdfPath, [
-                        'as' => 'card.pdf',
+                    ->subject('Bienvenue à notre service !')
+                    ->attachData($this->pdfContent, 'card.pdf', [
                         'mime' => 'application/pdf',
                     ]);
     }

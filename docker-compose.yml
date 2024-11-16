@@ -5,33 +5,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: app_wave
+    image: thatsbass/piral:v1
     volumes:
       - .:/var/www
     ports:
-      - "4000:8000"
+      - "8000:8000"
+    depends_on:
+      - redis
     environment:
-      - DB_CONNECTION=pgsql
-      - DB_HOST=ep-soft-mud-a57gl72t.us-east-2.aws.neon.tech
-      - DB_PORT=5432
-      - DB_DATABASE=neondb
-      - DB_USERNAME=neondb_owner 
-      - DB_PASSWORD=TrBljv3bgmD1  # Remplacez par votre mot de passe
-      - REDIS_HOST=redis
-      - REDIS_PASSWORD=null
-      - REDIS_PORT=6379
-      - JWT_SECRET=${JWT_SECRET}
-    networks:
-      - app-network
+      REDIS_HOST: redis
+      REDIS_PASSWORD: null
+      REDIS_PORT: 6379
 
   redis:
     image: redis:alpine
-    container_name: redis
-    networks:
-      - app-network
     ports:
       - "6379:6379"
-
-networks:
-  app-network:
-    driver: bridge

@@ -2,16 +2,51 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\TranferRequest;
 use Illuminate\Http\Request;
+use App\Services\TransferService;
+use App\Http\Requests\TransferRequest;
 
 class TransferController extends Controller
 {
 
+    protected $transferService;
+
+    public function __construct(TransferService $transferService)
+    {
+        $this->transferService = $transferService;
+    }
+
+
+    public function initiateTransfer(TransferRequest $request)
+    {
+        $transferKey = $this->transferService->initiateTransfer($request->validated());
+
+        return response()->json([
+            'message' => 'Transfert temporaire initié avec succès.',
+            'transfer_key' => $transferKey,
+        ], 201);
+    }
+
+
+    public function confirmTransfer(string $transferKey)
+    {
+        try {
+            $transfer = $this->transferService->confirmTransfer($transferKey);
+
+            return response()->json([
+                'message' => 'Transfert confirmé avec succès.',
+                'transfer' => $transfer,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => $e->getMessage()], 400);
+        }
+    }
+
+    
     // Create transfer
-    public function simpleTransfer(TranferRequest $request){}
-    public function MultipleTransfer(TranferRequest $request){}
-    public function scheduleTransfer(TranferRequest $request){}
+    public function simpleTransfer(TransferRequest $request){}
+    public function MultipleTransfer(TransferRequest $request){}
+    public function scheduleTransfer(TransferRequest $request){}
 
     // Get transfer history by client
     public function historyTransferByClient(Request $request){}
@@ -19,6 +54,10 @@ class TransferController extends Controller
     // Cancelled transfer
     public function cancelTransfer(Request $request){}
 }
+
+
+
+
 
 
 

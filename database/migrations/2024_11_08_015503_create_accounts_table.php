@@ -15,7 +15,7 @@ class CreateAccountsTable extends Migration
             $table->decimal('balanceMax', 15, 2)->default(200000);
             $table->decimal('balanceMensual', 15, 2)->default(1000000);
             $table->enum('currency', ['XOF', 'USD']);
-            $table->string('qrCode')->nullable();
+            $table->text('qrCode')->nullable();
             $table->enum('status', ['ACTIVE', 'BLOCKED']);
             $table->timestamps();
         });

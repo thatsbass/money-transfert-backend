@@ -17,18 +17,23 @@ class SendWelcomeEmailJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $user;
-    protected $qrCode;
+    protected $qrCodeBase64;
 
-    public function __construct(User $user, $qrCode)
+    public function __construct(User $user, $qrCodeBase64)
     {
         $this->user = $user;
-        $this->qrCode = $qrCode;
+        $this->qrCodeBase64 = $qrCodeBase64;
     }
 
     public function handle(PdfService $pdfService)
     {
-        $pdfPath = $pdfService->generatePdf($this->qrCode);
+        // Générer le PDF en base64
+        $pdfBase64 = $pdfService->generatePdf($this->qrCodeBase64);
 
-        Mail::to($this->user->email)->send(new WelcomeEmail($this->user, $pdfPath));
+        // Décoder le PDF en mémoire
+        $pdfContent = base64_decode($pdfBase64);
+
+        // Envoyer l'email avec le PDF attaché
+        Mail::to($this->user->email)->send(new WelcomeEmail($this->user, $pdfContent));
     }
 }

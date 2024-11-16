@@ -11,7 +11,7 @@
 <body>
     <div class="card">
         <h2>MoneyX card</h2>
-        <img src="data:image/png;base64,{{ base64_encode(file_get_contents($qrCodePath)) }}" />
+        <img src="data:image/png;base64,{{ $qrCodeBase64 }}" alt="QR Code">
         <p>Scan this QR code to pay with your MoneyX card.</p>
     </div>
 </body>
