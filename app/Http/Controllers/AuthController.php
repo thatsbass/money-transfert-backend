@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Account;
+use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redis;
 
 class AuthController extends Controller
@@ -18,7 +19,7 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-       
+
         if (!$token = Auth::attempt($request->only('phone', 'password'))) {
             return response()->json(['error' => 'Phone number or password incorrect'], 401);
         }
@@ -39,20 +40,22 @@ class AuthController extends Controller
         return response()->json(['error' => 'Token not provided'], 400);
     }
 
-    private function me()
+    public function currentUserInfos()
     {
         $curUser = auth()->user();
         $client = $curUser->client;
+        $account = Account::where('user_id',$curUser->id)->first();
+        $accountData = $account ? $account->only(['id', 'balance', 'qrCode']) : null;
         $clientData = $client ? $client->only(['id', 'address', 'CIN']) : null;
         $user = ([
             'id' => $curUser->id,
             'firstName' => $curUser->firstName,
             'lastName' => $curUser->lastName,
-            'email' => $curUser->email,
             'phone' => $curUser->phone,
-            'role_id' => $curUser->role_id,
+            'email' => $curUser->email,
             'photo' => $curUser->photo,
             'client' => $clientData,
+            'account'=> $accountData,
         ]);
         return $user;
     }
@@ -68,7 +71,6 @@ class AuthController extends Controller
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => Auth::factory()->getTTL() * 60,
-            'user' => $this->me()
         ]);
     }
 }

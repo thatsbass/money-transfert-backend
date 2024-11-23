@@ -1,14 +1,16 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\TransferService;
 use App\Http\Requests\TransferRequest;
+use App\Repositories\TransferRepository;
+use App\Models\User;
 
 class TransferController extends Controller
 {
-
     protected $transferService;
 
     public function __construct(TransferService $transferService)
@@ -16,56 +18,72 @@ class TransferController extends Controller
         $this->transferService = $transferService;
     }
 
-
-    public function initiateTransfer(TransferRequest $request)
+    // Initiate the transfer
+    public function initiate(TransferRequest $request)
     {
-        $transferKey = $this->transferService->initiateTransfer($request->validated());
+        // Recherche l'utilisateur par son numéro de téléphone
+        $receiver = User::where('phone', $request->receiver_phone)->first();
 
-        return response()->json([
-            'message' => 'Transfert temporaire initié avec succès.',
-            'transfer_key' => $transferKey,
-        ], 201);
+        if (!$receiver) {
+            return response()->json(['error' => 'Le destinataire n\'existe pas.'], 404);
+        }
+
+        // Créer le transfert
+        $redisKey = $this->transferService->initiateTransfer($request->all(), $receiver->id);
+
+        return response()->json(['message' => 'Transfert initié', 'key' => $redisKey], 201);
     }
 
-
-    public function confirmTransfer(string $transferKey)
+    public function confirm(string $key)
     {
         try {
-            $transfer = $this->transferService->confirmTransfer($transferKey);
+            $this->transferService->confirmTransfer($key);
 
-            return response()->json([
-                'message' => 'Transfert confirmé avec succès.',
-                'transfer' => $transfer,
-            ]);
+            return response()->json(['message' => 'Transfert confirmé.']);
         } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 400);
+            return response()->json(['error' => $e->getMessage()], 400);
         }
     }
 
-    
-    // Create transfer
-    public function simpleTransfer(TransferRequest $request){}
-    public function MultipleTransfer(TransferRequest $request){}
-    public function scheduleTransfer(TransferRequest $request){}
+    public function cancel(string $key)
+    {
+        try {
+            $this->transferService->cancelTransfer($key);
 
-    // Get transfer history by client
-    public function historyTransferByClient(Request $request){}
+            return response()->json(['message' => 'Transfert annulé.']);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
 
-    // Cancelled transfer
-    public function cancelTransfer(Request $request){}
+    public function history(Request $request, $accountId)
+    {
+        $transfers = app(TransferRepository::class)->getHistory($accountId)
+            ->load(['sender.user', 'receiver.user']);
+
+        $formattedTransfers = $transfers->map(function ($transfer) use ($accountId) {
+            $isSender = $transfer->sender_id === $accountId;
+
+            $otherAccount = $isSender ? $transfer->receiver : $transfer->sender;
+            $otherUser = $otherAccount->user;
+
+            return [
+                'id' => $transfer->id,
+                'amount' => $transfer->amount,
+                'fee' => $transfer->fee,
+                'status' => $transfer->status,
+                'signe' => $isSender ? '-' : '+',
+                'color' => $isSender ? 'red' : '',
+                'otherPerson' => [
+                    'id' => $otherAccount->id,
+                    'firstName' => $otherUser->firstName,
+                    'lastName' => $otherUser->lastName,
+                    'type' => $isSender ? 'receiver' : 'sender',
+                ],
+                'date' => $transfer->created_at->toDateTimeString(),
+            ];
+        });
+
+        return response()->json($formattedTransfers);
+    }
 }
-
-
-
-
-
-
-
-/*
-   * il faut une classe mere de base apiService qui s'occuperas le communication du backend avec le frontend qui aura les methode de requete
-    (post, get , put, delete) et les erreurs.
-
-    * Il faut des sercice qui s'herite de la classe apiService pour chaque methode de requete
-
-    * IL faut un seul provider qui s'occupe
-*/

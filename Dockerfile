@@ -1,7 +1,6 @@
 # Utiliser l'image PHP FPM
 FROM php:8.3-fpm
 
-# Installer les dépendances nécessaires pour Laravel, PostgreSQL, Redis, et Imagick
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpng-dev \

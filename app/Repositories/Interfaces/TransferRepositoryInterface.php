@@ -9,4 +9,5 @@ interface TransferRepositoryInterface
     public function delete($id);
     public function getAll();
     public function get($id);
+    public function getHistory(string $accountId);
 }

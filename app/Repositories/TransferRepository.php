@@ -31,4 +31,13 @@ class TransferRepository implements TransferRepositoryInterface
       return Transfer::destroy($id);
     }
 
+
+    public function getHistory(string $accountId)
+    {
+        return Transfer::where('sender_id', $accountId)
+            ->orWhere('receiver_id', $accountId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
 }

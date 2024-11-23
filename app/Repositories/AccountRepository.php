@@ -18,7 +18,11 @@ class AccountRepository implements AccountRepositoryInterface
     }
 
     public function get($id) {
-      return Account::find($id);
+      return Account::findOrFail($id);
+    }
+
+    public function getWithUser($accountId){
+      return Account::with('user')->where('id', $accountId)->first();
     }
 
 
